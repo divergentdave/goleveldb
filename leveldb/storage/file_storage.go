@@ -258,14 +258,14 @@ func (fs *fileStorage) setMeta(fd FileDesc) error {
 	} else if !os.IsNotExist(err) {
 		return err
 	}
-	path := fmt.Sprintf("%s.%d", filepath.Join(fs.path, "CURRENT"), fd.Num)
+	path := fmt.Sprintf("%s.%d.tmp", filepath.Join(fs.path, "CURRENT"), fd.Num)
 	if err := writeFileSynced(path, []byte(content), 0644); err != nil {
-		fs.log(fmt.Sprintf("create CURRENT.%d: %v", fd.Num, err))
+		fs.log(fmt.Sprintf("create CURRENT.%d.tmp: %v", fd.Num, err))
 		return err
 	}
 	// Replace CURRENT file.
 	if err := rename(path, currentPath); err != nil {
-		fs.log(fmt.Sprintf("rename CURRENT.%d: %v", fd.Num, err))
+		fs.log(fmt.Sprintf("rename CURRENT.%d.tmp: %v", fd.Num, err))
 		return err
 	}
 	// Sync root directory.

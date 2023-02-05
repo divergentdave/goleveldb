@@ -100,6 +100,15 @@ func (s *session) release() {
 
 // Create a new database session; need external synchronization.
 func (s *session) create() error {
+	// Pre-create the CURRENT file before writing the initial MANIFEST. Recovery
+	// will treat the database as corrupted if a MANIFEST file exists with no
+	// CURRENT, but it will ignore a CURRENT file with no MANIFEST files. This
+	// prevents the database from getting stuck in a corrupted state if the
+	// system crashes before this method finishes.
+	err := s.stor.SetMeta(storage.FileDesc{Type: storage.TypeManifest, Num: 0})
+	if err != nil {
+		return err
+	}
 	// create manifest
 	return s.newManifest(nil, nil)
 }
